@@ -1,19 +1,28 @@
+
+#ifndef _ALLABOUTEE_ESP8266_H
+#define _ALLABOUTEE_ESP8266_H
+
+#include <Arduino.h>
+
 namespace AllAboutEE
 {
     class ESP8266
     {
-        void joinAP(const String SSID, const String PASSWORD);
 
         String getIPAddress(),
-               sendCommand(String command, timeout);
+               sendCommand(String command, unsigned long timeout);
 
-        void cwMode(int mode),
-             cipSend(int connectionId, String data),
-             cipClose(),
-             cipServer(bool state, int port),
-             cipMux(bool state),
-             hardwareReset(),
-             softwareReset();
+        bool    ack(String m),
+                joinAP(const String SSID, const String PASSWORD),
+                cwMode(unsigned int mode),
+                cipSend(unsigned int connectionId, String data),
+                cipClose(),
+                cipServer(bool state, unsigned int port),
+                cipMux(bool state),
+                hardwareReset(),
+                softwareReset();
         
     };
 }
+
+#endif
