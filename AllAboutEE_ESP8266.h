@@ -50,7 +50,7 @@ namespace AllAboutEE
      * 
      * @return bool Command execution success/failure (true/false)
      */
-        bool cwJap(const String SSID,const String PASSWORD);
+        bool cwJap(const char* SSID, const char* PASSWORD);
 
     /**
      * 
@@ -151,6 +151,18 @@ namespace AllAboutEE
      * @return String The response from the ESP8266
      */
         String write(char* data, int dataSize, unsigned long timeoutMs);
+
+    /**
+     * 
+     * 
+     * @author Miguel (2/24/2015)
+     * 
+     * @param num The number from which you wish to find the length 
+     *            of
+     * 
+     * @return int The length of the given number
+     */
+        int intLength(unsigned int num);
 
         Stream *stream,
                *debug;

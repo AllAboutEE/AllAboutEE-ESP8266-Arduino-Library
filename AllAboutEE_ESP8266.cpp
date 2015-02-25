@@ -14,22 +14,37 @@ String AllAboutEE::ESP8266::getIPAddress()
     return write(command,sizeof(command)/sizeof(command[0]),1000);
 }
 
-bool AllAboutEE::ESP8266::cwJap(const String SSID, const String PASSWORD)
+bool AllAboutEE::ESP8266::cwJap(const char* SSID, const char* PASSWORD)
 {
 
-    const int commandLength = 16+SSID.length()+PASSWORD.length();
+    int ssidLength=0,passwordLength=0,count = 0;
 
     char command[100] = "AT+CWJAP=\""; // AT+CWJAP="ssid","pass"\r\n
 
-    char s[SSID.length()];
-    SSID.toCharArray(s,SSID.length()+1);
-    strcat(command,s);
+
+
+    strcat(command,SSID);
     strcat(command,"\",\"");
 
-    char p[PASSWORD.length()];
-    PASSWORD.toCharArray(p,PASSWORD.length()+1);
-    strcat(command,p);
+
+    strcat(command,PASSWORD);
     strcat(command,"\"\r\n");
+
+    while(*(SSID+count))
+    {
+        count++;
+    }
+    ssidLength=count;
+    count=0;
+
+    while(*(PASSWORD+count))
+    {
+        count++;
+    }
+    passwordLength=count;
+
+    const int commandLength = 16+ssidLength+passwordLength;
+
     write(command,commandLength,5000);
 
     return false;
@@ -67,6 +82,37 @@ bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, String data)
         return false;
     }
 
+    char command[] = "AT+CIPSEND="; // AT+CIPSEND=ID,dataLength\r\n
+
+    // append connection ID
+    int cidLength = intLength(connectionId);
+    char cidStr[cidLength];
+    sprintf(cidStr,"%d",connectionId);
+    strcat(command,cidStr);
+
+    // append comma
+    strcat(command,",");
+
+    // append data length
+    int dataLength = data.length();
+    char dlStr[dataLength];
+    sprintf(dlStr,"%d",dataLength);
+    strcat(command,dlStr);
+
+    // append end of command chars
+    strcat(command,"\r\n");
+
+    String response = write(command,sizeof(command)/sizeof(command[0]),1000);
+
+    if(response.indexOf('>') != -1)
+    {
+        // AT+CIPSEND command successfully received
+        int dl = data.length();
+        char dataArray[dl];
+        data.toCharArray(dataArray,dl);
+        write(dataArray,sizeof(dataArray)/sizeof(dataArray[0]),1000);
+
+    }
     return false;
 }
 
@@ -86,6 +132,25 @@ bool AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
 
 bool AllAboutEE::ESP8266::cipServer(bool state, unsigned int port)
 {
+
+    char command[19]="AT+CIPSERVER="; // AT+CIPSERVER=x,xx\r\n
+
+    if(state)
+    {
+        // turn server ON
+        strcat(command,"1,");
+    }else{
+        // turn server OFF
+        strcat(command,"0,");
+    }
+    
+    char portNumberString[3];
+    sprintf(portNumberString,"%d",port);
+    strcat(command,portNumberString);
+    strcat(command,"\r\n");
+
+    write(command,sizeof(command)/sizeof(command[0]),1000);
+
     return false;
 }
 
@@ -177,4 +242,30 @@ String AllAboutEE::ESP8266::write(char* data, int dataSize, unsigned long timeou
 
 
     return response;
+}
+
+/**
+ * 
+ * 
+ * @author Miguel (2/24/2015)
+ * 
+ * @details This function was specifically created to find the 
+ *        lenght of a port number for the AT+CIPSERVER command
+ *        so we shouldn't expect huge numbers really. In fact I
+ *        might be overdoing it with checking for integers
+ *        largers than 4.
+ * 
+ */
+int AllAboutEE::ESP8266::intLength(unsigned int num)
+{
+    if(num>=1000000000) return 10;
+    if(num>=100000000) return 9;
+    if(num>=10000000) return 8;
+    if(num>=1000000) return 7;
+    if(num>=100000) return 6;
+    if(num>=10000) return 5;
+    if(num>=1000) return 4;
+    if(num>=100) return 3;
+    if(num>=10) return 2;
+    return 1;
 }
