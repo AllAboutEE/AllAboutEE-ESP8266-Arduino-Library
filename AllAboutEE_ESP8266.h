@@ -112,11 +112,33 @@ namespace AllAboutEE
      */
         bool cipMux(bool state);
      
-
+    /**
+     * 
+     * 
+     * @author Miguel (2/25/2015)
+     * 
+     * @return char* The ESP to AP status string
+     */
         char* cipStatus(); 
 
+    /**
+     * 
+     * 
+     * @author Miguel (2/25/2015) 
+     *  
+     * @brief Quits the Access Point (AP) 
+     * 
+     * @return bool Command execution success/failure (true/false)
+     */
         bool cwQap();
 
+    /**
+     * 
+     * 
+     * @author Miguel (2/25/2015)
+     * 
+     * @return char* The available access points list.
+     */
         char* cwLap();
 
      /**
