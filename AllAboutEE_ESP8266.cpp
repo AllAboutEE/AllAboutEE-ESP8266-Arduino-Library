@@ -8,13 +8,13 @@ AllAboutEE::ESP8266::ESP8266(Stream *s,Stream *d,int8_t rp):stream(s),debug(d),r
 }
 
 
-char* AllAboutEE::ESP8266::getIPAddress()
+String AllAboutEE::ESP8266::ciFsr()
 {
     char command[] = "AT+CIFSR\r\n";
     return write(command,strlen(command),1000);
 }
 
-bool AllAboutEE::ESP8266::cwJap(const char* SSID, const char* PASSWORD)
+String AllAboutEE::ESP8266::cwJap(const char* SSID, const char* PASSWORD)
 {
 
     char command[100] = "AT+CWJAP=\""; // AT+CWJAP="ssid","pass"\r\n
@@ -26,14 +26,13 @@ bool AllAboutEE::ESP8266::cwJap(const char* SSID, const char* PASSWORD)
     strcat(command,"\"\r\n");
 
     const int commandLength = 16+strlen(SSID)+strlen(PASSWORD);
+    command[commandLength+1] = '\0';
 
-    write(command,commandLength,5000);
-
-    return false;
+    return write(command,commandLength,5000);
 }
 
 
-bool AllAboutEE::ESP8266::cwMode(unsigned int mode)
+String AllAboutEE::ESP8266::cwMode(unsigned int mode)
 {
     char command[14]="AT+CWMODE="; // AT+CWMODE=x\r\n\0
     char m[2];
@@ -46,22 +45,22 @@ bool AllAboutEE::ESP8266::cwMode(unsigned int mode)
         sprintf(m,"%d",mode);
         strcat(command,m);
         strcat(command,"\r\n");
-        write(command,strlen(command),1000);
+        
         break;
     default:
-        return false;
+        return "ERROR";
         break;
     }
     
-    return false;
+    return write(command,strlen(command),1000);;
 }
 
-bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, const char* data)
+String AllAboutEE::ESP8266::cipSend(unsigned int connectionId, const char* data)
 {
     if(connectionId>8)
     {
         // there cannot be more than 8 connections
-        return false;
+        return "ERROR";
     }
 
     char command[] = "AT+CIPSEND="; // AT+CIPSEND=ID,dataLength\r\n
@@ -89,13 +88,13 @@ bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, const char* data)
     if(response.indexOf('>') != -1)
     {
         // AT+CIPSEND command successfully received
-        write(data,strlen(data),1000);
+        return write(data,strlen(data),1000);
 
     }
-    return false;
+    return "ERROR";
 }
 
-bool AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
+String AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
 {
     char command[16]="AT+CIPCLOSE="; // AT+CIPCLOSE=x\r\n\0
     char connection[1];
@@ -103,13 +102,12 @@ bool AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
     sprintf(connection,"%d",connectionId);
     strcat(command,connection);
     strcat(command,"\r\n");
-    write(command,strlen(command),1000);
+    return write(command,strlen(command),1000);
 
-    return false;
 }
 
 
-bool AllAboutEE::ESP8266::cipServer(bool state, unsigned int port)
+String AllAboutEE::ESP8266::cipServer(bool state, unsigned int port)
 {
 
     char command[20]="AT+CIPSERVER="; // AT+CIPSERVER=x,xx\r\n\0
@@ -128,12 +126,10 @@ bool AllAboutEE::ESP8266::cipServer(bool state, unsigned int port)
     strcat(command,portNumberString);
     strcat(command,"\r\n");
 
-    write(command,sizeof(command)/sizeof(command[0]),1000);
-
-    return false;
+    return write(command,sizeof(command)/sizeof(command[0]),1000);
 }
 
-bool AllAboutEE::ESP8266::cipMux(bool state)
+String AllAboutEE::ESP8266::cipMux(bool state)
 {
     char command[14] = "AT+CIPMUX="; // AT+CIPMUX=x\r\n\0
     char s[2]="0";
@@ -155,25 +151,22 @@ bool AllAboutEE::ESP8266::cipMux(bool state)
     command[13] = '\0';
     */
     
-    write(command,sizeof(command)/sizeof(command[0]),1000);
-
-    return false;
+    return write(command,sizeof(command)/sizeof(command[0]),1000);
 }
 
-char* AllAboutEE::ESP8266::cipStatus()
+String AllAboutEE::ESP8266::cipStatus()
 {
     char command[] = "AT+CIPSTATUS\r\n";
     return write(command,strlen(command),2000);
 }
 
-bool AllAboutEE::ESP8266::cwQap()
+String AllAboutEE::ESP8266::cwQap()
 {
     char command[] = "AT+CWQAP\r\n";
-    write(command,strlen(command),5000);
-    return false;
+    return write(command,strlen(command),5000);
 }
 
-char* AllAboutEE::ESP8266::cwLap()
+String AllAboutEE::ESP8266::cwLap()
 {
     char command[] = "AT+CWLAP\r\n";
     return  write(command,strlen(command),5000);
@@ -192,13 +185,13 @@ bool AllAboutEE::ESP8266::hardwareReset()
 }
 
 
-char* AllAboutEE::ESP8266::softwareReset()
+String AllAboutEE::ESP8266::rst()
 {
     char command[] = "AT+RST\r\n";
     return write(command,strlen(command),2000);
 }
 
-char* AllAboutEE::ESP8266::write(const char* data, int dataSize, unsigned long timeoutMs)
+String AllAboutEE::ESP8266::write(const char* data, int dataSize, unsigned long timeoutMs)
 {
     String response = "";
            
@@ -221,8 +214,9 @@ char* AllAboutEE::ESP8266::write(const char* data, int dataSize, unsigned long t
     {
       debug->print(response);
     }
+
     
-    return "hello";
+    return response;
 }
 
 /**

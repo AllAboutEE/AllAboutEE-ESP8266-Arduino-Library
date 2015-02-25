@@ -12,12 +12,13 @@ namespace AllAboutEE
      *  
      * @details The "ESP8266" can be used to interface with the 
      *        ESP8266 module via UART. The class has functions which
-     *        can send the ESP8266 commands, and display their
-     *        response.
+     *        provide and interface to the ESP8266 AT+ commands
+     *        set.
      */
     class ESP8266
     {
     public:
+
     /**
      * 
      * 
@@ -35,10 +36,9 @@ namespace AllAboutEE
      * 
      * @author Miguel (2/24/2015)
      * 
-     * @return char* The IP address assigned to the ESP8266 by the 
-     *         access point.
+     * @return String Response from AT+CIFSR command.
      */
-        char* getIPAddress();
+        String ciFsr();
 
     /**
      * 
@@ -48,9 +48,9 @@ namespace AllAboutEE
      * @param SSID The access point's SSID (network name)
      * @param PASSWORD The access point's password/passphrase
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response from the AT+CWJAP command
      */
-        bool cwJap(const char* SSID, const char* PASSWORD);
+        String cwJap(const char* SSID, const char* PASSWORD);
 
     /**
      * 
@@ -59,9 +59,9 @@ namespace AllAboutEE
      * 
      * @param mode 1 = station, 2 = access point, 3 = both
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response from AT+CWMODE command
      */
-        bool cwMode(unsigned int mode);
+        String cwMode(unsigned int mode);
 
     /**
      * 
@@ -72,9 +72,9 @@ namespace AllAboutEE
      *                     the data to
      * @param data The data to send
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response form AT+CIPSEND command
      */
-        bool cipSend(unsigned int connectionId, const char* data);
+        String cipSend(unsigned int connectionId, const char* data);
 
     /**
      * 
@@ -84,9 +84,9 @@ namespace AllAboutEE
      * @param connectionId The ID of the connection you wish to 
      *                     close.
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response from AT+CIPCLOSE command
      */
-        bool cipClose(unsigned int connectionId);
+        String cipClose(unsigned int connectionId);
 
     /**
      * 
@@ -97,9 +97,9 @@ namespace AllAboutEE
      * @param port The server port, where it will receive 
      *             connections
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response from AT+CIPSERVER command
      */
-        bool cipServer(bool state, unsigned int port);
+        String cipServer(bool state, unsigned int port);
 
     /**
      * 
@@ -108,18 +108,18 @@ namespace AllAboutEE
      * 
      * @param state Enable multiple connections? yes/no (true/false)
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response from AT+CIPMUX command
      */
-        bool cipMux(bool state);
+        String cipMux(bool state);
      
     /**
      * 
      * 
      * @author Miguel (2/25/2015)
      * 
-     * @return char* The ESP to AP status string
+     * @return String Response from the AT+CIPSTATUS command
      */
-        char* cipStatus(); 
+        String cipStatus(); 
 
     /**
      * 
@@ -128,18 +128,18 @@ namespace AllAboutEE
      *  
      * @brief Quits the Access Point (AP) 
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return String Response from AT+CWQAP command.
      */
-        bool cwQap();
+        String cwQap();
 
     /**
      * 
      * 
      * @author Miguel (2/25/2015)
      * 
-     * @return char* The available access points list.
+     * @return String Response from the AT+CWLAP command.
      */
-        char* cwLap();
+        String cwLap();
 
      /**
      * 
@@ -155,9 +155,9 @@ namespace AllAboutEE
      * 
      * @author Miguel (2/24/2015)
      * 
-     * @return char* Command execution success/failure (true/false)
+     * @return String Response from AT+RST command
      */
-        char* softwareReset();
+        String rst();
 
     private:
     /**
@@ -170,9 +170,10 @@ namespace AllAboutEE
      * @param timeoutMs time to wait for a response from the ESP8266
      *                  (if one is expected)
      * 
-     * @return String The response from the ESP8266
+     * @return String The response from the ESP8266 after sending it 
+     *         data
      */
-        char* write(const char* data, int dataSize, unsigned long timeoutMs);
+        String write(const char* data, int dataSize, unsigned long timeoutMs);
 
     /**
      * 
