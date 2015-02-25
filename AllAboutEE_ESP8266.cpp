@@ -8,42 +8,24 @@ AllAboutEE::ESP8266::ESP8266(Stream *s,Stream *d,int8_t rp):stream(s),debug(d),r
 }
 
 
-String AllAboutEE::ESP8266::getIPAddress()
+char* AllAboutEE::ESP8266::getIPAddress()
 {
     char command[] = "AT+CIFSR\r\n";
-    return write(command,sizeof(command)/sizeof(command[0]),1000);
+    return write(command,strlen(command),1000);
 }
 
 bool AllAboutEE::ESP8266::cwJap(const char* SSID, const char* PASSWORD)
 {
 
-    int ssidLength=0,passwordLength=0,count = 0;
-
     char command[100] = "AT+CWJAP=\""; // AT+CWJAP="ssid","pass"\r\n
-
-
 
     strcat(command,SSID);
     strcat(command,"\",\"");
 
-
     strcat(command,PASSWORD);
     strcat(command,"\"\r\n");
 
-    while(*(SSID+count))
-    {
-        count++;
-    }
-    ssidLength=count;
-    count=0;
-
-    while(*(PASSWORD+count))
-    {
-        count++;
-    }
-    passwordLength=count;
-
-    const int commandLength = 16+ssidLength+passwordLength;
+    const int commandLength = 16+strlen(SSID)+strlen(PASSWORD);
 
     write(command,commandLength,5000);
 
@@ -53,8 +35,8 @@ bool AllAboutEE::ESP8266::cwJap(const char* SSID, const char* PASSWORD)
 
 bool AllAboutEE::ESP8266::cwMode(unsigned int mode)
 {
-    char command[13]="AT+CWMODE="; // AT+CWMODE=x\r\n
-    char m[1];
+    char command[14]="AT+CWMODE="; // AT+CWMODE=x\r\n\0
+    char m[2];
 
     switch(mode)
     {
@@ -64,7 +46,7 @@ bool AllAboutEE::ESP8266::cwMode(unsigned int mode)
         sprintf(m,"%d",mode);
         strcat(command,m);
         strcat(command,"\r\n");
-        write(command,sizeof(command)/sizeof(command[0]),1000);
+        write(command,strlen(command),1000);
         break;
     default:
         return false;
@@ -74,7 +56,7 @@ bool AllAboutEE::ESP8266::cwMode(unsigned int mode)
     return false;
 }
 
-bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, String data)
+bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, const char* data)
 {
     if(connectionId>8)
     {
@@ -94,23 +76,20 @@ bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, String data)
     strcat(command,",");
 
     // append data length
-    int dataLength = data.length();
+    int dataLength = strlen(data);
     char dlStr[dataLength];
-    sprintf(dlStr,"%d",dataLength);
+    sprintf(dlStr,"%d",strlen(data));
     strcat(command,dlStr);
 
     // append end of command chars
     strcat(command,"\r\n");
 
-    String response = write(command,sizeof(command)/sizeof(command[0]),1000);
+    String response = write(command,strlen(command),1000);
 
     if(response.indexOf('>') != -1)
     {
         // AT+CIPSEND command successfully received
-        int dl = data.length();
-        char dataArray[dl];
-        data.toCharArray(dataArray,dl);
-        write(dataArray,sizeof(dataArray)/sizeof(dataArray[0]),1000);
+        write(data,strlen(data),1000);
 
     }
     return false;
@@ -118,13 +97,13 @@ bool AllAboutEE::ESP8266::cipSend(unsigned int connectionId, String data)
 
 bool AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
 {
-    char command[15]="AT+CIPCLOSE="; // AT+CIPCLOSE=x\r\n
+    char command[16]="AT+CIPCLOSE="; // AT+CIPCLOSE=x\r\n\0
     char connection[1];
 
     sprintf(connection,"%d",connectionId);
     strcat(command,connection);
     strcat(command,"\r\n");
-    write(command,sizeof(command)/sizeof(command[0]),1000);
+    write(command,strlen(command),1000);
 
     return false;
 }
@@ -133,7 +112,7 @@ bool AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
 bool AllAboutEE::ESP8266::cipServer(bool state, unsigned int port)
 {
 
-    char command[19]="AT+CIPSERVER="; // AT+CIPSERVER=x,xx\r\n
+    char command[20]="AT+CIPSERVER="; // AT+CIPSERVER=x,xx\r\n\0
 
     if(state)
     {
@@ -156,41 +135,48 @@ bool AllAboutEE::ESP8266::cipServer(bool state, unsigned int port)
 
 bool AllAboutEE::ESP8266::cipMux(bool state)
 {
-    char command[13] = "AT+CIPMUX=";
-    char s[1];
+    char command[14] = "AT+CIPMUX="; // AT+CIPMUX=x\r\n\0
+    char s[2]="0";
 
     if(state)
     {
-        sprintf(s,"%d",1);
+        s[0] = '1';
     }
     else
     {
-        sprintf(s,"%d",1);
+        s[0] = '0';
     }
 
-    strcat(command,s);
-    strcat(command,"\r\n");
+    strcat(command,s); // Alternative method, reduces progsize: command[10] = s[0];
+    strcat(command,"\r\n"); // Alernative method, reduces progsize:
+    /*
+    command[11] = '\r';
+    command[12] = '\n';
+    command[13] = '\0';
+    */
+    
     write(command,sizeof(command)/sizeof(command[0]),1000);
 
     return false;
 }
 
-String AllAboutEE::ESP8266::cipStatus()
+char* AllAboutEE::ESP8266::cipStatus()
 {
-    return "FAIL";
+    char command[] = "AT+CIPSTATUS\r\n";
+    return write(command,strlen(command),2000);
 }
 
 bool AllAboutEE::ESP8266::cwQap()
 {
     char command[] = "AT+CWQAP\r\n";
-    return  write(command,sizeof(command)/sizeof(command[0]),5000);
+    write(command,strlen(command),5000);
     return false;
 }
 
-String AllAboutEE::ESP8266::cwLap()
+char* AllAboutEE::ESP8266::cwLap()
 {
     char command[] = "AT+CWLAP\r\n";
-    return  write(command,sizeof(command)/sizeof(command[0]),5000);
+    return  write(command,strlen(command),5000);
 }
 
 bool AllAboutEE::ESP8266::hardwareReset()
@@ -206,42 +192,37 @@ bool AllAboutEE::ESP8266::hardwareReset()
 }
 
 
-bool AllAboutEE::ESP8266::softwareReset()
+char* AllAboutEE::ESP8266::softwareReset()
 {
     char command[] = "AT+RST\r\n";
-    write(command,sizeof(command)/sizeof(command[0]),2000);
-    return false;
+    return write(command,strlen(command),2000);
 }
 
-String AllAboutEE::ESP8266::write(char* data, int dataSize, unsigned long timeoutMs)
+char* AllAboutEE::ESP8266::write(const char* data, int dataSize, unsigned long timeoutMs)
 {
     String response = "";
+           
+    stream->write(data,dataSize); // send the read character to the esp8266
     
-    stream->write(data,dataSize);
-
     unsigned long time = millis();
-
-    while((time+timeoutMs)>millis())
+    
+    while( (time+timeoutMs) > millis())
     {
-        while(stream->available())
-        {
-            char c = stream->read();
-            response +=c;
-        }
+      while(stream->available())
+      {
+        
+        // The esp has data so display its output to the serial window 
+        char c = stream->read(); // read the next character.
+        response+=c;
+      }  
     }
-
-    if(response.length()==0)
+    
+    if(debug)
     {
-       // this command did not respond or does not have a response
-       response = "NULL";
+      debug->print(response);
     }
-
-    if(debug){
-        debug->print(response);
-    }
-
-
-    return response;
+    
+    return "hello";
 }
 
 /**

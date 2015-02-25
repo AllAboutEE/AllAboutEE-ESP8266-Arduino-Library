@@ -35,10 +35,10 @@ namespace AllAboutEE
      * 
      * @author Miguel (2/24/2015)
      * 
-     * @return String The IP address assigned to the ESP8266 by the 
+     * @return char* The IP address assigned to the ESP8266 by the 
      *         access point.
      */
-        String getIPAddress();
+        char* getIPAddress();
 
     /**
      * 
@@ -74,7 +74,7 @@ namespace AllAboutEE
      * 
      * @return bool Command execution success/failure (true/false)
      */
-        bool cipSend(unsigned int connectionId, String data);
+        bool cipSend(unsigned int connectionId, const char* data);
 
     /**
      * 
@@ -113,11 +113,11 @@ namespace AllAboutEE
         bool cipMux(bool state);
      
 
-        String cipStatus(); 
+        char* cipStatus(); 
 
         bool cwQap();
 
-        String cwLap();
+        char* cwLap();
 
      /**
      * 
@@ -133,9 +133,9 @@ namespace AllAboutEE
      * 
      * @author Miguel (2/24/2015)
      * 
-     * @return bool Command execution success/failure (true/false)
+     * @return char* Command execution success/failure (true/false)
      */
-        bool softwareReset();
+        char* softwareReset();
 
     private:
     /**
@@ -150,7 +150,7 @@ namespace AllAboutEE
      * 
      * @return String The response from the ESP8266
      */
-        String write(char* data, int dataSize, unsigned long timeoutMs);
+        char* write(const char* data, int dataSize, unsigned long timeoutMs);
 
     /**
      * 
