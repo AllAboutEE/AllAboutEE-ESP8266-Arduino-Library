@@ -55,7 +55,7 @@ String AllAboutEE::ESP8266::cwMode(unsigned int mode)
     return write(command,strlen(command),1000);;
 }
 
-String AllAboutEE::ESP8266::cipSend(unsigned int connectionId, const char* data)
+String AllAboutEE::ESP8266::cipSend(int connectionId, const char* data)
 {
     if(connectionId>8)
     {
@@ -94,15 +94,15 @@ String AllAboutEE::ESP8266::cipSend(unsigned int connectionId, const char* data)
     return "ERROR";
 }
 
-String AllAboutEE::ESP8266::cipClose(unsigned int connectionId)
+String AllAboutEE::ESP8266::cipClose(int connectionId)
 {
     char command[16]="AT+CIPCLOSE="; // AT+CIPCLOSE=x\r\n\0
-    char connection[1];
+    char connection[2];
 
     sprintf(connection,"%d",connectionId);
     strcat(command,connection);
     strcat(command,"\r\n");
-    return write(command,strlen(command),1000);
+    return write(command,strlen(command),3000);
 
 }
 
